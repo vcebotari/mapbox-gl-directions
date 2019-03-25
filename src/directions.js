@@ -51,7 +51,6 @@ import Instructions from './controls/instructions';
  * @return {MapboxDirections} `this`
  */
 export default class MapboxDirections {
-
   constructor(options) {
     this.actions = bindActionCreators(actions, store.dispatch);
     this.actions.setOptions(options || {});
@@ -69,7 +68,7 @@ export default class MapboxDirections {
 
     const { controls } = store.getState();
 
-    var el = this.container = document.createElement('div');
+    var el = (this.container = document.createElement('div'));
     el.className = 'mapboxgl-ctrl-directions mapboxgl-ctrl';
 
     // Add controls to the page
@@ -80,16 +79,21 @@ export default class MapboxDirections {
     const directionsEl = document.createElement('div');
     directionsEl.className = 'directions-control directions-control-instructions';
 
-    new Instructions(directionsEl, store, {
-      hoverMarker: this.actions.hoverMarker,
-      setRouteIndex: this.actions.setRouteIndex
-    }, this._map);
+    new Instructions(
+      directionsEl,
+      store,
+      {
+        hoverMarker: this.actions.hoverMarker,
+        setRouteIndex: this.actions.setRouteIndex,
+      },
+      this._map
+    );
 
     if (controls.inputs) el.appendChild(inputEl);
     if (controls.instructions) el.appendChild(directionsEl);
 
     this.subscribedActions();
-    if (this._map.loaded()) this.mapState()
+    if (this._map.loaded()) this.mapState();
     else this._map.on('load', () => this.mapState());
 
     return el;
@@ -113,7 +117,7 @@ export default class MapboxDirections {
       this.storeUnsubscribe();
       delete this.storeUnsubscribe;
     }
-    directionsStyle.forEach((layer) => {
+    directionsStyle.forEach(layer => {
       if (map.getLayer(layer.id)) map.removeLayer(layer.id);
     });
 
@@ -133,20 +137,19 @@ export default class MapboxDirections {
       type: 'geojson',
       data: {
         type: 'FeatureCollection',
-        features: []
-      }
+        features: [],
+      },
     };
 
     // Add and set data theme layer/style
     this._map.addSource('directions', geojson);
 
     // Add direction specific styles to the map
-    if (styles && styles.length) styles.forEach((style) => this._map.addLayer(style));
-    directionsStyle.forEach((style) => {
+    if (styles && styles.length) styles.forEach(style => this._map.addLayer(style));
+    directionsStyle.forEach(style => {
       // only add the default style layer if a custom layer wasn't provided
       if (!this._map.getLayer(style.id)) this._map.addLayer(style);
     });
-
 
     if (interactive) {
       this._map.on('mousedown', this.onDragDown);
@@ -160,28 +163,17 @@ export default class MapboxDirections {
 
   subscribedActions() {
     this.storeUnsubscribe = store.subscribe(() => {
-      const {
-        origin,
-        destination,
-        hoverMarker,
-        directions,
-        routeIndex
-      } = store.getState();
+      const { origin, destination, hoverMarker, directions, routeIndex } = store.getState();
 
       const geojson = {
         type: 'FeatureCollection',
-        features: [
-          origin,
-          destination,
-          hoverMarker
-        ].filter((d) => {
+        features: [origin, destination, hoverMarker].filter(d => {
           return d.geometry;
-        })
+        }),
       };
 
       if (directions.length) {
         directions.forEach((feature, index) => {
-
           const features = [];
 
           const decoded = decode(feature.geometry, 5).map(function(c) {
@@ -190,7 +182,10 @@ export default class MapboxDirections {
 
           decoded.forEach(function(c, i) {
             var previous = features[features.length - 1];
-            var congestion = feature.legs[0].annotation && feature.legs[0].annotation.congestion && feature.legs[0].annotation.congestion[i - 1];
+            var congestion =
+              feature.legs[0].annotation &&
+              feature.legs[0].annotation.congestion &&
+              feature.legs[0].annotation.congestion[i - 1];
 
             if (previous && (!congestion || previous.properties.congestion === congestion)) {
               previous.geometry.coordinates.push(c);
@@ -198,16 +193,19 @@ export default class MapboxDirections {
               var segment = {
                 geometry: {
                   type: 'LineString',
-                  coordinates: []
+                  coordinates: [],
                 },
                 properties: {
                   'route-index': index,
-                  route: (index === routeIndex) ? 'selected' : 'alternate',
-                }
+                  route: index === routeIndex ? 'selected' : 'alternate',
+                },
               };
 
               // New segment starts with previous segment's last coordinate.
-              if (previous) segment.geometry.coordinates.push(previous.geometry.coordinates[previous.geometry.coordinates.length - 1]);
+              if (previous)
+                segment.geometry.coordinates.push(
+                  previous.geometry.coordinates[previous.geometry.coordinates.length - 1]
+                );
 
               segment.geometry.coordinates.push(c);
 
@@ -223,19 +221,18 @@ export default class MapboxDirections {
 
           if (index === routeIndex) {
             // Collect any possible waypoints from steps
-            feature.legs[0].steps.forEach((d) => {
+            feature.legs[0].steps.forEach(d => {
               if (d.maneuver.type === 'waypoint') {
                 geojson.features.push({
                   type: 'Feature',
                   geometry: d.maneuver.location,
                   properties: {
-                    id: 'waypoint'
-                  }
+                    id: 'waypoint',
+                  },
                 });
               }
             });
           }
-
         });
       }
 
@@ -256,7 +253,6 @@ export default class MapboxDirections {
           singleClickHandler(event);
           timer = null;
         }, delay);
-
       } else {
         clearTimeout(timer);
         timer = null;
@@ -272,20 +268,18 @@ export default class MapboxDirections {
     if (!origin.geometry) {
       this.actions.setOriginFromCoordinates(coords);
     } else {
-
       const features = this._map.queryRenderedFeatures(e.point, {
         layers: [
           'directions-origin-point',
           'directions-destination-point',
           'directions-waypoint-point',
-          'directions-route-line-alt'
-        ]
+          'directions-route-line-alt',
+        ],
       });
 
       if (features.length) {
-
         // Remove any waypoints
-        features.forEach((f) => {
+        features.forEach(f => {
           if (f.layer.id === 'directions-waypoint-point') {
             this.actions.removeWaypoint(f);
           }
@@ -293,6 +287,9 @@ export default class MapboxDirections {
 
         if (features[0].properties.route === 'alternate') {
           const index = features[0].properties['route-index'];
+          if (this.options.onRouteChange) {
+            this.options.onRouteChange(index);
+          }
           this.actions.setRouteIndex(index);
         }
       } else {
@@ -311,8 +308,8 @@ export default class MapboxDirections {
         'directions-route-line',
         'directions-origin-point',
         'directions-destination-point',
-        'directions-hover-point'
-      ]
+        'directions-hover-point',
+      ],
     });
 
     this._map.getCanvas().style.cursor = features.length ? 'pointer' : '';
@@ -322,14 +319,13 @@ export default class MapboxDirections {
       this._map.dragPan.disable();
 
       // Add a possible waypoint marker when hovering over the active route line
-      features.forEach((feature) => {
+      features.forEach(feature => {
         if (feature.layer.id === 'directions-route-line') {
           this.actions.hoverMarker([e.lngLat.lng, e.lngLat.lat]);
         } else if (hoverMarker.geometry) {
           this.actions.hoverMarker(null);
         }
       });
-
     } else if (this.isCursorOverPoint) {
       this.isCursorOverPoint = false;
       this._map.dragPan.enable();
@@ -341,10 +337,10 @@ export default class MapboxDirections {
     this.isDragging = this.isCursorOverPoint;
     this._map.getCanvas().style.cursor = 'grab';
 
-    this._map.on('mousemove', this.onDragMove);
+    // this._map.on('mousemove', this.onDragMove);
     this._map.on('mouseup', this.onDragUp);
 
-    this._map.on('touchmove', this.onDragMove);
+    // this._map.on('touchmove', this.onDragMove);
     this._map.on('touchend', this.onDragUp);
   }
 
@@ -355,13 +351,13 @@ export default class MapboxDirections {
     switch (this.isDragging.layer.id) {
       case 'directions-origin-point':
         this.actions.createOrigin(coords);
-      break;
+        break;
       case 'directions-destination-point':
         this.actions.createDestination(coords);
-      break;
+        break;
       case 'directions-hover-point':
         this.actions.hoverMarker(coords);
-      break;
+        break;
     }
   }
 
@@ -369,29 +365,29 @@ export default class MapboxDirections {
     if (!this.isDragging) return;
 
     const { hoverMarker, origin, destination } = store.getState();
-
+    if (this.options.onDragUp) {
+      this.options.onDragUp(this.isDragging.layer.id, { origin: origin, destination: destination });
+    }
     switch (this.isDragging.layer.id) {
       case 'directions-origin-point':
         this.actions.setOriginFromCoordinates(origin.geometry.coordinates);
-      break;
+        break;
       case 'directions-destination-point':
         this.actions.setDestinationFromCoordinates(destination.geometry.coordinates);
-      break;
+        break;
       case 'directions-hover-point':
         // Add waypoint if a sufficent amount of dragging has occurred.
         if (hoverMarker.geometry && !utils.coordinateMatch(this.isDragging, hoverMarker)) {
           this.actions.addWaypoint(0, hoverMarker);
         }
-      break;
+        break;
     }
 
     this.isDragging = false;
     this._map.getCanvas().style.cursor = '';
-
-    this._map.off('touchmove', this.onDragMove);
+    // this._map.off('touchmove', this.onDragMove);
     this._map.off('touchend', this.onDragUp);
-
-    this._map.off('mousemove', this.onDragMove);
+    // this._map.off('mousemove', this.onDragMove);
     this._map.off('mouseup', this.onDragUp);
   }
 
