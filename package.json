@@ -1,6 +1,6 @@
 {
   "name": "@simpals/mapbox-gl-directions",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "A mapboxgl plugin for the Mapbox Directions API",
   "main": "./src/index.js",
   "browserify": {
@@ -30,7 +30,7 @@
     "osm",
     "gl"
   ],
-  "author": "xxx",
+  "author": "vcebotari",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/mapbox/mapbox-gl-directions/issues"

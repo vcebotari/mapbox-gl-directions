@@ -337,10 +337,10 @@ export default class MapboxDirections {
     this.isDragging = this.isCursorOverPoint;
     this._map.getCanvas().style.cursor = 'grab';
 
-    // this._map.on('mousemove', this.onDragMove);
+    this._map.on('mousemove', this.onDragMove);
     this._map.on('mouseup', this.onDragUp);
 
-    // this._map.on('touchmove', this.onDragMove);
+    this._map.on('touchmove', this.onDragMove);
     this._map.on('touchend', this.onDragUp);
   }
 
@@ -385,9 +385,9 @@ export default class MapboxDirections {
 
     this.isDragging = false;
     this._map.getCanvas().style.cursor = '';
-    // this._map.off('touchmove', this.onDragMove);
+    this._map.off('touchmove', this.onDragMove);
     this._map.off('touchend', this.onDragUp);
-    // this._map.off('mousemove', this.onDragMove);
+    this._map.off('mousemove', this.onDragMove);
     this._map.off('mouseup', this.onDragUp);
   }
 

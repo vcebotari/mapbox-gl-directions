@@ -3,10 +3,10 @@ import utils from '../utils';
 const request = new XMLHttpRequest();
 
 function originPoint(coordinates) {
-  return (dispatch) => {
+  return dispatch => {
     const origin = utils.createPoint(coordinates, {
       id: 'origin',
-      'marker-symbol': 'A'
+      'marker-symbol': 'A',
     });
 
     dispatch({ type: types.ORIGIN, origin });
@@ -15,10 +15,10 @@ function originPoint(coordinates) {
 }
 
 function destinationPoint(coordinates) {
-  return (dispatch) => {
+  return dispatch => {
     const destination = utils.createPoint(coordinates, {
       id: 'destination',
-      'marker-symbol': 'B'
+      'marker-symbol': 'B',
     });
 
     dispatch({ type: types.DESTINATION, destination });
@@ -30,7 +30,7 @@ function setDirections(directions) {
   return dispatch => {
     dispatch({
       type: types.DIRECTIONS,
-      directions
+      directions,
     });
     dispatch(eventEmit('route', { route: directions }));
   };
@@ -39,14 +39,14 @@ function setDirections(directions) {
 function updateWaypoints(waypoints) {
   return {
     type: types.WAYPOINTS,
-    waypoints: waypoints
+    waypoints: waypoints,
   };
 }
 
 function setHoverMarker(feature) {
   return {
     type: types.HOVER_MARKER,
-    hoverMarker: feature
+    hoverMarker: feature,
   };
 }
 
@@ -108,27 +108,25 @@ function buildDirectionsQuery(state) {
   const { origin, destination, waypoints } = state();
 
   let query = [];
-  query.push((origin.geometry.coordinates).join(','));
+  query.push(origin.geometry.coordinates.join(','));
   query.push(';');
 
   // Add any waypoints.
   if (waypoints.length) {
-    waypoints.forEach((waypoint) => {
-      query.push((waypoint.geometry.coordinates).join(','));
+    waypoints.forEach(waypoint => {
+      query.push(waypoint.geometry.coordinates.join(','));
       query.push(';');
     });
   }
 
-  query.push((destination.geometry.coordinates).join(','));
+  query.push(destination.geometry.coordinates.join(','));
   return encodeURIComponent(query.join(''));
 }
 
 function normalizeWaypoint(waypoint) {
   const properties = { id: 'waypoint' };
   return Object.assign(waypoint, {
-    properties: waypoint.properties ?
-      Object.assign(waypoint.properties, properties) :
-      properties
+    properties: waypoint.properties ? Object.assign(waypoint.properties, properties) : properties,
   });
 }
 
@@ -136,7 +134,7 @@ function setError(error) {
   return dispatch => {
     dispatch({
       type: 'ERROR',
-      error
+      error,
     });
     if (error) dispatch(eventEmit('error', { error: error }));
   };
@@ -145,35 +143,35 @@ function setError(error) {
 export function queryOrigin(query) {
   return {
     type: types.ORIGIN_QUERY,
-    query
+    query,
   };
 }
 
 export function queryDestination(query) {
   return {
     type: types.DESTINATION_QUERY,
-    query
+    query,
   };
 }
 
 export function queryOriginCoordinates(coords) {
   return {
     type: types.ORIGIN_FROM_COORDINATES,
-    coordinates: coords
+    coordinates: coords,
   };
 }
 
 export function queryDestinationCoordinates(coords) {
   return {
     type: types.DESTINATION_FROM_COORDINATES,
-    coordinates: coords
+    coordinates: coords,
   };
 }
 
 export function clearOrigin() {
   return dispatch => {
     dispatch({
-      type: types.ORIGIN_CLEAR
+      type: types.ORIGIN_CLEAR,
     });
     dispatch(eventEmit('clear', { type: 'origin' }));
     dispatch(setError(null));
@@ -183,7 +181,7 @@ export function clearOrigin() {
 export function clearDestination() {
   return dispatch => {
     dispatch({
-      type: types.DESTINATION_CLEAR
+      type: types.DESTINATION_CLEAR,
     });
     dispatch(eventEmit('clear', { type: 'destination' }));
     dispatch(setError(null));
@@ -193,13 +191,13 @@ export function clearDestination() {
 export function setOptions(options) {
   return {
     type: types.SET_OPTIONS,
-    options: options
+    options: options,
   };
 }
 
 export function hoverMarker(coordinates) {
-  return (dispatch) => {
-    const feature = (coordinates) ? utils.createPoint(coordinates, { id: 'hover'}) : {};
+  return dispatch => {
+    const feature = coordinates ? utils.createPoint(coordinates, { id: 'hover' }) : {};
     dispatch(setHoverMarker(feature));
   };
 }
@@ -207,7 +205,7 @@ export function hoverMarker(coordinates) {
 export function setRouteIndex(routeIndex) {
   return {
     type: types.ROUTE_INDEX,
-    routeIndex
+    routeIndex,
   };
 }
 
@@ -215,7 +213,7 @@ export function createOrigin(coordinates) {
   return (dispatch, getState) => {
     const { destination } = getState();
     dispatch(originPoint(coordinates));
-    if (destination.geometry) dispatch(fetchDirections());
+    // if (destination.geometry) dispatch(fetchDirections());
   };
 }
 
@@ -223,7 +221,7 @@ export function createDestination(coordinates) {
   return (dispatch, getState) => {
     const { origin } = getState();
     dispatch(destinationPoint(coordinates));
-    if (origin.geometry) dispatch(fetchDirections());
+    // if (origin.geometry) dispatch(fetchDirections());
   };
 }
 
@@ -251,9 +249,10 @@ export function reverse() {
  * @param {Array<number>} coordinates [lng, lat] array.
  */
 export function setOriginFromCoordinates(coords) {
-  return (dispatch) => {
+  return dispatch => {
     if (!utils.validCoords(coords)) coords = [utils.wrap(coords[0]), utils.wrap(coords[1])];
-    if (isNaN(coords[0]) && isNaN(coords[1])) return dispatch(setError(new Error('Coordinates are not valid')));
+    if (isNaN(coords[0]) && isNaN(coords[1]))
+      return dispatch(setError(new Error('Coordinates are not valid')));
     dispatch(queryOriginCoordinates(coords));
     dispatch(createOrigin(coords));
   };
@@ -265,9 +264,10 @@ export function setOriginFromCoordinates(coords) {
  * @param {Array<number>} coords [lng, lat] array.
  */
 export function setDestinationFromCoordinates(coords) {
-  return (dispatch) => {
+  return dispatch => {
     if (!utils.validCoords(coords)) coords = [utils.wrap(coords[0]), utils.wrap(coords[1])];
-    if (isNaN(coords[0]) && isNaN(coords[1])) return dispatch(setError(new Error('Coordinates are not valid')));
+    if (isNaN(coords[0]) && isNaN(coords[1]))
+      return dispatch(setError(new Error('Coordinates are not valid')));
     dispatch(createDestination(coords));
     dispatch(queryDestinationCoordinates(coords));
   };
@@ -294,12 +294,12 @@ export function setWaypoint(index, waypoint) {
 export function removeWaypoint(waypoint) {
   return (dispatch, getState) => {
     let { destination, waypoints } = getState();
-      waypoints = waypoints.filter((way) => {
-        return !utils.coordinateMatch(way, waypoint);
-      });
+    waypoints = waypoints.filter(way => {
+      return !utils.coordinateMatch(way, waypoint);
+    });
 
-      dispatch(updateWaypoints(waypoints));
-      if (destination.geometry) dispatch(fetchDirections());
+    dispatch(updateWaypoints(waypoints));
+    if (destination.geometry) dispatch(fetchDirections());
   };
 }
 
@@ -310,7 +310,7 @@ export function eventSubscribe(type, fn) {
     events[type].push(fn);
     return {
       type: types.EVENTS,
-      events
+      events,
     };
   };
 }
@@ -322,7 +322,7 @@ export function eventEmit(type, data) {
     if (!events[type]) {
       return {
         type: types.EVENTS,
-        events
+        events,
       };
     }
 
