@@ -142,14 +142,16 @@ export default class MapboxDirections {
     };
 
     // Add and set data theme layer/style
-    this._map.addSource('directions', geojson);
+    if (!this._map.getSource('directions')) this._map.addSource('directions', geojson);
 
-    // Add direction specific styles to the map
-    if (styles && styles.length) styles.forEach(style => this._map.addLayer(style));
-    directionsStyle.forEach(style => {
-      // only add the default style layer if a custom layer wasn't provided
-      if (!this._map.getLayer(style.id)) this._map.addLayer(style);
-    });
+    // // Add direction specific styles to the map
+    // if (styles && styles.length) {
+    //   styles.forEach(style => this._map.addLayer(style, this.options.insertBefore || null));
+    // }
+    // directionsStyle.forEach(style => {
+    //   // only add the default style layer if a custom layer wasn't provided
+    //   if (!this._map.getLayer(style.id)) this._map.addLayer(style, this.options.insertBefore || null);
+    // });
 
     if (interactive) {
       this._map.on('mousedown', this.onDragDown);
@@ -163,7 +165,7 @@ export default class MapboxDirections {
 
   subscribedActions() {
     this.storeUnsubscribe = store.subscribe(() => {
-      const { origin, destination, hoverMarker, directions, routeIndex } = store.getState();
+      const { origin, profile, destination, hoverMarker, directions, routeIndex } = store.getState();
 
       const geojson = {
         type: 'FeatureCollection',
@@ -197,6 +199,7 @@ export default class MapboxDirections {
                 },
                 properties: {
                   'route-index': index,
+                  profile: profile,
                   route: index === routeIndex ? 'selected' : 'alternate',
                 },
               };
@@ -350,10 +353,10 @@ export default class MapboxDirections {
     const coords = [e.lngLat.lng, e.lngLat.lat];
     switch (this.isDragging.layer.id) {
       case 'directions-origin-point':
-        this.actions.createOrigin(coords);
+        this.actions.createOrigin(coords, true);
         break;
       case 'directions-destination-point':
-        this.actions.createDestination(coords);
+        this.actions.createDestination(coords, true);
         break;
       case 'directions-hover-point':
         this.actions.hoverMarker(coords);
@@ -371,9 +374,12 @@ export default class MapboxDirections {
     switch (this.isDragging.layer.id) {
       case 'directions-origin-point':
         this.actions.setOriginFromCoordinates(origin.geometry.coordinates);
+        // this.actions.fetchOrigin(origin)
+
         break;
       case 'directions-destination-point':
         this.actions.setDestinationFromCoordinates(destination.geometry.coordinates);
+        // this.actions.fetchDestination(destination)
         break;
       case 'directions-hover-point':
         // Add waypoint if a sufficent amount of dragging has occurred.

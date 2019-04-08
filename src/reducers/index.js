@@ -20,7 +20,7 @@ const initialState = {
   controls: {
     profileSwitcher: true,
     inputs: true,
-    instructions: true
+    instructions: true,
   },
 
   // Optional setting to pass options available to mapbox-gl-geocoder
@@ -45,94 +45,106 @@ const initialState = {
 
   // Directions data
   directions: [],
-  routeIndex: 0
+  routeIndex: 0,
 };
 
 function data(state = initialState, action) {
   switch (action.type) {
-  case types.SET_OPTIONS:
-    return deepAssign({}, state, action.options);
+    case types.SET_OPTIONS:
+      return deepAssign({}, state, action.options);
 
-  case types.DIRECTIONS_PROFILE:
-    return Object.assign({}, state, {
-      profile: action.profile
-    });
+    case types.ADD_ROUTING_STYLES: {
+      const { mapGL, styles } = action;
+      if (styles) {
+        // Add direction specific styles to the map
+        styles.forEach(style => {
+          if (!mapGL.getLayer(style.id)) {
+            mapGL.addLayer(style);
+          }
+        });
+      }
+      return state;
+    }
+    case types.DIRECTIONS_PROFILE:
+      return Object.assign({}, state, {
+        profile: action.profile,
+      });
 
-  case types.ORIGIN:
-    return Object.assign({}, state, {
-      origin: action.origin,
-      hoverMarker: {}
-    });
+    case types.ORIGIN:
+      return Object.assign({}, state, {
+        origin: action.origin,
+        hoverMarker: {},
+      });
 
-  case types.DESTINATION:
-    return Object.assign({}, state, {
-      destination: action.destination,
-      hoverMarker: {}
-    });
+    case types.DESTINATION:
+      return Object.assign({}, state, {
+        destination: action.destination,
+        hoverMarker: {},
+      });
 
-  case types.HOVER_MARKER:
-    return Object.assign({}, state, {
-      hoverMarker: action.hoverMarker
-    });
+    case types.HOVER_MARKER:
+      return Object.assign({}, state, {
+        hoverMarker: action.hoverMarker,
+      });
 
-  case types.WAYPOINTS:
-    return Object.assign({}, state, {
-      waypoints: action.waypoints
-    });
+    case types.WAYPOINTS:
+      return Object.assign({}, state, {
+        waypoints: action.waypoints,
+      });
 
-  case types.ORIGIN_QUERY:
-    return Object.assign({}, state, {
-      originQuery: action.query
-    });
+    case types.ORIGIN_QUERY:
+      return Object.assign({}, state, {
+        originQuery: action.query,
+      });
 
-  case types.DESTINATION_QUERY:
-    return Object.assign({}, state, {
-      destinationQuery: action.query
-    });
+    case types.DESTINATION_QUERY:
+      return Object.assign({}, state, {
+        destinationQuery: action.query,
+      });
 
-  case types.ORIGIN_FROM_COORDINATES:
-    return Object.assign({}, state, {
-      originQueryCoordinates: action.coordinates
-    });
+    case types.ORIGIN_FROM_COORDINATES:
+      return Object.assign({}, state, {
+        originQueryCoordinates: action.coordinates,
+      });
 
-  case types.DESTINATION_FROM_COORDINATES:
-    return Object.assign({}, state, {
-      destinationQueryCoordinates: action.coordinates
-    });
+    case types.DESTINATION_FROM_COORDINATES:
+      return Object.assign({}, state, {
+        destinationQueryCoordinates: action.coordinates,
+      });
 
-  case types.ORIGIN_CLEAR:
-    return Object.assign({}, state, {
-      origin: {},
-      originQuery: '',
-      waypoints: [],
-      directions: []
-    });
+    case types.ORIGIN_CLEAR:
+      return Object.assign({}, state, {
+        origin: {},
+        originQuery: '',
+        waypoints: [],
+        directions: [],
+      });
 
-  case types.DESTINATION_CLEAR:
-    return Object.assign({}, state, {
-      destination: {},
-      destinationQuery: '',
-      waypoints: [],
-      directions: []
-    });
+    case types.DESTINATION_CLEAR:
+      return Object.assign({}, state, {
+        destination: {},
+        destinationQuery: '',
+        waypoints: [],
+        directions: [],
+      });
 
-  case types.DIRECTIONS:
-    return Object.assign({}, state, {
-      directions: action.directions
-    });
+    case types.DIRECTIONS:
+      return Object.assign({}, state, {
+        directions: action.directions,
+      });
 
-  case types.ROUTE_INDEX:
-    return Object.assign({}, state, {
-      routeIndex: action.routeIndex
-    });
+    case types.ROUTE_INDEX:
+      return Object.assign({}, state, {
+        routeIndex: action.routeIndex,
+      });
 
-  case types.ERROR:
-    return Object.assign({}, state, {
-      error: action.error
-    });
+    case types.ERROR:
+      return Object.assign({}, state, {
+        error: action.error,
+      });
 
-  default:
-    return state;
+    default:
+      return state;
   }
 }
 

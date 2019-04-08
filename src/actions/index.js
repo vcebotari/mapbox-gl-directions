@@ -209,19 +209,38 @@ export function setRouteIndex(routeIndex) {
   };
 }
 
-export function createOrigin(coordinates) {
+export function createOrigin(coordinates, noFetch) {
   return (dispatch, getState) => {
     const { destination } = getState();
     dispatch(originPoint(coordinates));
-    // if (destination.geometry) dispatch(fetchDirections());
+    if (!noFetch) {
+      if (destination.geometry) dispatch(fetchDirections());
+    }
   };
 }
 
-export function createDestination(coordinates) {
+export function createDestination(coordinates, noFetch) {
   return (dispatch, getState) => {
     const { origin } = getState();
     dispatch(destinationPoint(coordinates));
-    // if (origin.geometry) dispatch(fetchDirections());
+    if (!noFetch) {
+      if (origin.geometry) dispatch(fetchDirections());
+    }
+  };
+}
+export function fetchOrigin(coordinates) {
+  return (dispatch, getState) => {
+    const { destination } = getState();
+    // dispatch(originPoint(coordinates));
+    if (destination.geometry) dispatch(fetchDirections());
+  };
+}
+
+export function fetchDestination(coordinates) {
+  return (dispatch, getState) => {
+    const { origin } = getState();
+    // dispatch(destinationPoint(coordinates));
+    if (origin.geometry) dispatch(fetchDirections());
   };
 }
 
@@ -231,6 +250,14 @@ export function setProfile(profile) {
     dispatch({ type: types.DIRECTIONS_PROFILE, profile });
     dispatch(eventEmit('profile', { profile }));
     if (origin.geometry && destination.geometry) dispatch(fetchDirections());
+  };
+}
+
+export function addRoutingStyles(mapGL) {
+  return (dispatch, getState) => {
+    const { styles } = getState();
+    dispatch({ type: types.ADD_ROUTING_STYLES, mapGL, styles });
+    dispatch(eventEmit('setRoutingStyles', { mapGL }));
   };
 }
 
